@@ -1,0 +1,139 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --brand: 82 82 91;
+  }
+
+  * {
+    box-sizing: border-box;
+  }
+
+  html {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    scroll-behavior: smooth;
+  }
+
+  body {
+    background-color: #F9FAFB; /* Very light cool gray */
+    color: #111827; /* Near black */
+    font-family: "Inter", system-ui, sans-serif;
+    font-size: 16px;
+    line-height: 1.6;
+  }
+
+  ::selection {
+    background-color: rgba(82, 82, 91, 0.2);
+    color: #111827;
+  }
+
+  ::-webkit-scrollbar {
+    width: 4px;
+  }
+  ::-webkit-scrollbar-track {
+    background: #F9FAFB;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: #D1D5DB;
+  }
+}
+
+@layer components {
+  /* ── Buttons ─────────────────────────────────────────────────── */
+  .btn-primary {
+    @apply inline-flex items-center gap-2 bg-black text-white font-semibold text-sm px-6 py-3 
+           border border-black transition-all duration-200 
+           hover:bg-transparent hover:text-black cursor-pointer select-none;
+  }
+
+  .btn-secondary {
+    @apply inline-flex items-center gap-2 bg-transparent text-black font-semibold text-sm px-6 py-3 
+           border border-gray-300 transition-all duration-200 
+           hover:border-black hover:bg-black/5 cursor-pointer select-none;
+  }
+
+  .btn-ghost {
+    @apply inline-flex items-center gap-2 text-gray-500 font-medium text-sm px-4 py-2 
+           transition-all duration-150 hover:text-black cursor-pointer select-none;
+  }
+
+  /* ── Typography ──────────────────────────────────────────────── */
+  .label-mono {
+    @apply font-mono text-[0.65rem] uppercase tracking-[0.15em] text-gray-400;
+  }
+
+  .section-divider {
+    @apply border-t border-gray-200 w-full;
+  }
+
+  /* ── Layout ─────────────────────────────────────────────────── */
+  .g-container {
+    @apply max-w-7xl mx-auto px-6 md:px-10;
+  }
+
+  .g-section {
+    @apply py-20 md:py-28;
+  }
+
+  /* ── Cards ───────────────────────────────────────────────────── */
+  .g-card {
+    @apply bg-white border border-gray-200 p-8 transition-all duration-200 hover:border-gray-400;
+  }
+
+  /* ── Grid lines (Palantir-style decorative) ─────────────────── */
+  .grid-pattern {
+    background-image: linear-gradient(to right, #e5e7eb 1px, transparent 1px), linear-gradient(to bottom, #e5e7eb 1px, transparent 1px);
+    background-size: 80px 80px;
+  }
+  
+  .grid-line-h {
+    @apply absolute left-0 right-0 h-px bg-gray-200 pointer-events-none;
+  }
+
+  .grid-line-v {
+    @apply absolute top-0 bottom-0 w-px bg-gray-200 pointer-events-none;
+  }
+
+  /* ── Chat UI ─────────────────────────────────────────────────── */
+  .chat-bubble-user {
+    @apply bg-black text-white text-sm px-4 py-2.5 max-w-[78%] ml-auto leading-relaxed shadow-sm;
+  }
+
+  .chat-bubble-bot {
+    @apply bg-white border border-gray-200 text-gray-800 text-sm px-4 py-2.5 max-w-[78%] leading-relaxed shadow-sm;
+  }
+
+  /* ── Hover reveal (services section) ──────────────────────────── */
+  .service-row {
+    @apply border-b border-gray-200 transition-all duration-300 cursor-default;
+  }
+
+  .service-row:hover {
+    @apply bg-white border-gray-300 shadow-sm;
+  }
+
+  .service-reveal {
+    @apply overflow-hidden transition-all duration-300 ease-expo;
+    max-height: 0;
+  }
+
+  .service-row:hover .service-reveal {
+    max-height: 200px;
+  }
+
+  /* ── Number counter decorative ────────────────────────────────── */
+  .counter-num {
+    @apply font-mono text-[0.65rem] text-gray-400 leading-none tracking-widest;
+  }
+}
+
+/* ── Marquee animation ────────────────────────────────────────────── */
+@keyframes marquee {
+  0%   { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
