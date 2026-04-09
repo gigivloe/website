@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Calvet — AI Assistent Demo</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: Inter, -apple-system, sans-serif;
+      height: 100vh; overflow: hidden;
+      background: url('https://storage.googleapis.com/firecrawl-scrape-media/screenshot-d2e28ecb-bbaf-4c42-a92e-88645d2f8ab8.png?GoogleAccessId=scrape-bucket-accessor%40firecrawl.iam.gserviceaccount.com&Expires=1776377471&Signature=NtOqmrPGX%2FphVfK2Dh7XI7wtPcViNy1jY374SjNfPbOH6xysMrDsUUPrD%2BfwmZbc9%2BC7gR67vZHrlaIZ4eiki510TEJkuvv%2Bow%2FJdEIToBo02bi2phIkjb6KJwprK%2Bbw5oMcL0C65H8WcVpiReTDlagUC34XDvknjo9hf3IkvomGsubzpIcogdg3VvquYNMxgjikc8srMuNBP%2F5N%2Fakv8Fhz11bbTNvfoA%2FKvn04fhCHFunGxNCGF%2F9hfnWPLr4YdVOfgkM85qs2joNSjQDLQsn6JEmWJ6SE7nTp3aHx28CGQKjQIj%2BCWEdyja8d2jIlRSDNXTXgZ%2BwVcSTIIK9PiA%3D%3D') center center / cover no-repeat;
+    }
+    .overlay {
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,0.3);
+      backdrop-filter: blur(2px);
+    }
+    .demo-badge {
+      position: fixed; top: 20px; left: 50%; transform: translateX(-50%);
+      background: rgba(0,0,0,0.65); color: white;
+      padding: 8px 22px; border-radius: 20px; font-size: 13px;
+      z-index: 100; letter-spacing: 0.4px; white-space: nowrap;
+    }
+    #chat-bubble {
+      position: fixed; bottom: 28px; right: 28px;
+      width: 62px; height: 62px; border-radius: 50%;
+      background: #E8291C;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.3);
+      cursor: pointer; z-index: 1000;
+      display: flex; align-items: center; justify-content: center;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    #chat-bubble:hover { transform: scale(1.07); box-shadow: 0 6px 28px rgba(0,0,0,0.35); }
+    #chat-bubble svg { width: 28px; height: 28px; fill: white; }
+    #chat-window {
+      position: fixed; bottom: 104px; right: 28px;
+      width: 375px; height: 530px;
+      background: white; border-radius: 18px;
+      box-shadow: 0 12px 48px rgba(0,0,0,0.22);
+      display: none; flex-direction: column;
+      overflow: hidden; z-index: 1000;
+    }
+    #chat-window.open { display: flex; }
+    .chat-header {
+      background: #E8291C; color: white;
+      padding: 15px 18px; display: flex; align-items: center; gap: 11px;
+      flex-shrink: 0;
+    }
+    .chat-header img {
+      width: 38px; height: 38px; border-radius: 50%;
+      object-fit: contain; background: white; padding: 3px;
+    }
+    .chat-header-info h3 { font-size: 15px; font-weight: 600; }
+    .chat-header-info p { font-size: 12px; opacity: 0.8; margin-top: 1px; }
+    .status-dot { width: 9px; height: 9px; background: #4ade80; border-radius: 50%; margin-left: auto; flex-shrink: 0; }
+    .chat-messages {
+      flex: 1; padding: 16px; overflow-y: auto;
+      display: flex; flex-direction: column; gap: 10px;
+      background: #f7f8fa;
+    }
+    .msg {
+      max-width: 84%; padding: 10px 14px; border-radius: 14px;
+      font-size: 14px; line-height: 1.5; word-wrap: break-word;
+    }
+    .msg.bot {
+      background: white; color: #1a1a1a;
+      border-bottom-left-radius: 4px;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.07);
+      align-self: flex-start;
+    }
+    .msg.user {
+      background: #E8291C; color: white;
+      border-bottom-right-radius: 4px;
+      align-self: flex-end;
+    }
+    .msg.typing { background: white; color: #aaa; font-style: italic; align-self: flex-start; font-size: 13px; }
+    .chat-input-area {
+      padding: 12px 14px; border-top: 1px solid #eee;
+      display: flex; gap: 8px; background: white; flex-shrink: 0;
+    }
+    .chat-input-area input {
+      flex: 1; padding: 10px 15px; border: 1px solid #e2e2e2;
+      border-radius: 24px; font-size: 14px; outline: none;
+      font-family: inherit; transition: border-color 0.15s;
+    }
+    .chat-input-area input:focus { border-color: #E8291C; }
+    .chat-input-area button {
+      width: 42px; height: 42px; border-radius: 50%;
+      background: #E8291C; border: none; cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0; transition: opacity 0.15s;
+    }
+    .chat-input-area button:hover { opacity: 0.88; }
+    .chat-input-area button svg { width: 18px; height: 18px; fill: white; }
+    .powered-by {
+      text-align: center; font-size: 11px; color: #bbb;
+      padding: 7px 0 10px; background: white; flex-shrink: 0;
+    }
+  </style>
+</head>
+<body>
+  <div class="overlay"></div>
+  <div class="demo-badge">AI Chatbot Demo — Powered by Gradient</div>
+
+  <div id="chat-bubble" onclick="toggleChat()" title="Chat met Cal">
+    <svg viewBox="0 0 24 24"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z"/></svg>
+  </div>
+
+  <div id="chat-window">
+    <div class="chat-header">
+      <img src="https://calvet.eu/wp-content/uploads/2024/06/calvet_logo.svg" alt="logo" onerror="this.style.display='none'">
+      <div class="chat-header-info">
+        <h3>Cal</h3>
+        <p>Calvet Virtual Assistant</p>
+      </div>
+      <div class="status-dot"></div>
+    </div>
+    <div class="chat-messages" id="messages">
+      <div class="msg bot">Hallo! Ik ben Cal, de virtuele assistent van Calvet. Hoe kan ik u helpen?</div>
+    </div>
+    <div class="chat-input-area">
+      <input type="text" id="user-input" placeholder="Stel uw vraag..."
+             onkeydown="if(event.key==='Enter')sendMessage()">
+      <button onclick="sendMessage()">
+        <svg viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
+      </button>
+    </div>
+    <div class="powered-by">Powered by Gradient AI</div>
+  </div>
+
+  <script>
+    // Token protection — URL must contain #TOKEN to access this demo
+    const EXPECTED_TOKEN = 'fx-kVz4dRbA';
+    if (window.location.hash !== '#' + EXPECTED_TOKEN) {
+      document.body.innerHTML = '';
+      document.title = '';
+      throw new Error('Access denied');
+    }
+
+    const API_URL = 'https://gradientai.eu/api/chat/calvet';
+    let history = [];
+    let open = false;
+
+    function toggleChat() {
+      open = !open;
+      document.getElementById('chat-window').classList.toggle('open', open);
+      if (open) document.getElementById('user-input').focus();
+    }
+
+    function addMsg(text, role) {
+      const el = document.createElement('div');
+      el.className = 'msg ' + role;
+      el.textContent = text;
+      const msgs = document.getElementById('messages');
+      msgs.appendChild(el);
+      msgs.scrollTop = msgs.scrollHeight;
+      return el;
+    }
+
+    async function sendMessage() {
+      const input = document.getElementById('user-input');
+      const text = input.value.trim();
+      if (!text) return;
+      input.value = '';
+      addMsg(text, 'user');
+      history.push({ role: 'user', content: text });
+      const typing = addMsg('Typing...', 'typing');
+      try {
+        const res = await fetch(API_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ message: text, history: history.slice(-6) })
+        });
+        const data = await res.json();
+        typing.remove();
+        const reply = data.reply || "Er is een probleem met de verbinding. Probeer het opnieuw.";
+        addMsg(reply, 'bot');
+        history.push({ role: 'assistant', content: reply });
+      } catch(e) {
+        typing.remove();
+        addMsg('Verbindingsfout — probeer het opnieuw.', 'bot');
+      }
+    }
+  </script>
+</body>
+</html>
