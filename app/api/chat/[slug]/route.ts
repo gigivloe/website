@@ -7,7 +7,7 @@ const supabase = createClient(
 )
 
 const GEMINI_KEY = process.env.GEMINI_API_KEY
-const GEMINI_CHAT_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_KEY}`
+const GEMINI_CHAT_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite-preview:generateContent?key=${GEMINI_KEY}`
 const GEMINI_EMBED_URL = `https://generativelanguage.googleapis.com/v1beta/models/text-embedding-004:embedContent?key=${GEMINI_KEY}`
 
 async function embedText(text: string): Promise<number[]> {
