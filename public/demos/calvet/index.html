@@ -35,7 +35,7 @@
     #chat-bubble svg { width: 28px; height: 28px; fill: white; }
     #chat-window {
       position: fixed; bottom: 104px; right: 28px;
-      width: 375px; height: 530px;
+      width: 375px; max-height: 580px;
       background: white; border-radius: 18px;
       box-shadow: 0 12px 48px rgba(0,0,0,0.22);
       display: none; flex-direction: column;
@@ -57,7 +57,7 @@
     .chat-messages {
       flex: 1; padding: 16px; overflow-y: auto;
       display: flex; flex-direction: column; gap: 10px;
-      background: #f7f8fa;
+      background: #f7f8fa; min-height: 120px;
     }
     .msg {
       max-width: 84%; padding: 10px 14px; border-radius: 14px;
@@ -75,6 +75,18 @@
       align-self: flex-end;
     }
     .msg.typing { background: white; color: #aaa; font-style: italic; align-self: flex-start; font-size: 13px; }
+    .suggestions {
+      padding: 6px 14px 12px; background: #f7f8fa;
+      display: flex; flex-wrap: wrap; gap: 7px; flex-shrink: 0;
+    }
+    .suggestions.hidden { display: none; }
+    .suggestion-chip {
+      padding: 7px 13px; border-radius: 18px; font-size: 12.5px;
+      border: 1.5px solid #E8381A; color: #E8381A;
+      background: white; cursor: pointer; font-family: inherit;
+      transition: background 0.15s, color 0.15s; line-height: 1.35; text-align: left;
+    }
+    .suggestion-chip:hover { background: #E8381A; color: white; }
     .chat-input-area {
       padding: 12px 14px; border-top: 1px solid #eee;
       display: flex; gap: 8px; background: white; flex-shrink: 0;
@@ -107,17 +119,23 @@
     <svg viewBox="0 0 24 24"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z"/></svg>
   </div>
 
-  <div id="chat-window">
+  <div id="chat-window" class="open">
     <div class="chat-header">
       <img src="https://calvet.eu/wp-content/uploads/2024/09/calvet_logo.webp" alt="Calvet logo" onerror="this.style.display='none'">
       <div class="chat-header-info">
         <h3>Cal</h3>
-        <p>Calvet Virtual Assistant</p>
+        <p>Virtuele assistent van Calvet</p>
       </div>
       <div class="status-dot"></div>
     </div>
     <div class="chat-messages" id="messages">
-      <div class="msg bot">Hallo! Ik ben Cal, de virtuele assistent van Calvet. Hoe kan ik u helpen?</div>
+      <div class="msg bot">Welkom bij Calvet! Ik ben Cal, uw digitale gids voor bewerkingsmachines voor aluminium, kunststof en staal. Of u nu op zoek bent naar de juiste machine voor uw productielijn, vragen heeft over service en onderhoud, of een demonstratie wil plannen — ik help u graag verder.</div>
+    </div>
+    <div class="suggestions" id="suggestions">
+      <button class="suggestion-chip" onclick="sendSuggestion(this)">Welke machines levert Calvet voor de verwerking van aluminium?</button>
+      <button class="suggestion-chip" onclick="sendSuggestion(this)">Hoe kan ik een demonstratie of offerte aanvragen bij Calvet?</button>
+      <button class="suggestion-chip" onclick="sendSuggestion(this)">Welke service en onderhoudsmogelijkheden biedt Calvet aan?</button>
+      <button class="suggestion-chip" onclick="sendSuggestion(this)">In welke sectoren worden Calvet-machines ingezet?</button>
     </div>
     <div class="chat-input-area">
       <input type="text" id="user-input" placeholder="Stel uw vraag..."
@@ -140,12 +158,21 @@
 
     const API_URL = 'https://www.gradientai.eu/api/chat/calvet';
     let history = [];
-    let open = false;
+    let open = true;
 
     function toggleChat() {
       open = !open;
       document.getElementById('chat-window').classList.toggle('open', open);
       if (open) document.getElementById('user-input').focus();
+    }
+
+    function hideSuggestions() {
+      document.getElementById('suggestions').classList.add('hidden');
+    }
+
+    function sendSuggestion(btn) {
+      hideSuggestions();
+      sendMessageText(btn.textContent);
     }
 
     function addMsg(text, role) {
@@ -158,14 +185,19 @@
       return el;
     }
 
-    async function sendMessage() {
+    function sendMessage() {
       const input = document.getElementById('user-input');
       const text = input.value.trim();
       if (!text) return;
       input.value = '';
+      hideSuggestions();
+      sendMessageText(text);
+    }
+
+    async function sendMessageText(text) {
       addMsg(text, 'user');
       history.push({ role: 'user', content: text });
-      const typing = addMsg('Typing...', 'typing');
+      const typing = addMsg('Aan het typen...', 'typing');
       try {
         const res = await fetch(API_URL, {
           method: 'POST',
@@ -174,9 +206,8 @@
         });
         const data = await res.json();
         typing.remove();
-        const reply = data.reply || "Er is een verbindingsprobleem — probeer het opnieuw.";
-        addMsg(reply, 'bot');
-        history.push({ role: 'assistant', content: reply });
+        addMsg(data.reply || '...', 'bot');
+        history.push({ role: 'assistant', content: data.reply });
       } catch(e) {
         typing.remove();
         addMsg('Verbindingsfout — probeer het opnieuw.', 'bot');
