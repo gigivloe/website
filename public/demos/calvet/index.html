@@ -25,7 +25,7 @@
     #chat-bubble {
       position: fixed; bottom: 28px; right: 28px;
       width: 62px; height: 62px; border-radius: 50%;
-      background: #E8291C;
+      background: #E8381A;
       box-shadow: 0 4px 24px rgba(0,0,0,0.3);
       cursor: pointer; z-index: 1000;
       display: flex; align-items: center; justify-content: center;
@@ -43,7 +43,7 @@
     }
     #chat-window.open { display: flex; }
     .chat-header {
-      background: #E8291C; color: white;
+      background: #E8381A; color: white;
       padding: 15px 18px; display: flex; align-items: center; gap: 11px;
       flex-shrink: 0;
     }
@@ -70,7 +70,7 @@
       align-self: flex-start;
     }
     .msg.user {
-      background: #E8291C; color: white;
+      background: #E8381A; color: white;
       border-bottom-right-radius: 4px;
       align-self: flex-end;
     }
@@ -84,10 +84,10 @@
       border-radius: 24px; font-size: 14px; outline: none;
       font-family: inherit; transition: border-color 0.15s;
     }
-    .chat-input-area input:focus { border-color: #E8291C; }
+    .chat-input-area input:focus { border-color: #E8381A; }
     .chat-input-area button {
       width: 42px; height: 42px; border-radius: 50%;
-      background: #E8291C; border: none; cursor: pointer;
+      background: #E8381A; border: none; cursor: pointer;
       display: flex; align-items: center; justify-content: center;
       flex-shrink: 0; transition: opacity 0.15s;
     }
@@ -109,7 +109,7 @@
 
   <div id="chat-window">
     <div class="chat-header">
-      <img src="https://calvet.eu/wp-content/uploads/2024/06/calvet_logo.svg" alt="logo" onerror="this.style.display='none'">
+      <img src="https://calvet.eu/wp-content/uploads/2024/09/calvet_logo.webp" alt="Calvet logo" onerror="this.style.display='none'">
       <div class="chat-header-info">
         <h3>Cal</h3>
         <p>Calvet Virtual Assistant</p>
@@ -131,7 +131,7 @@
 
   <script>
     // Token protection — URL must contain #TOKEN to access this demo
-    const EXPECTED_TOKEN = 'fx-kVz4dRbA';
+    const EXPECTED_TOKEN = 'f1UL2tNK9pw';
     if (window.location.hash !== '#' + EXPECTED_TOKEN) {
       document.body.innerHTML = '';
       document.title = '';
@@ -174,7 +174,7 @@
         });
         const data = await res.json();
         typing.remove();
-        const reply = data.reply || "Er is een probleem met de verbinding. Probeer het opnieuw.";
+        const reply = data.reply || "Er is een verbindingsprobleem — probeer het opnieuw.";
         addMsg(reply, 'bot');
         history.push({ role: 'assistant', content: reply });
       } catch(e) {
